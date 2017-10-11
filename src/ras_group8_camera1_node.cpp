@@ -5,8 +5,16 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+//for publicing center as multiarray: ,... maybe not all needed
+#include <stdio.h>
+#include <stdlib.h>
+#include "std_msgs/MultiArrayLayout.h"
+#include "std_msgs/MultiArrayDimension.h"
+#include "std_msgs/Int32MultiArray.h"
+
 //try:
 //#include <sensor_msgs/ChannelFloat32>
+
 
 static const std::string OPENCV_WINDOW = "Image window";
 
@@ -16,8 +24,8 @@ class ImageConverter
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
   image_transport::Publisher image_pub_;
+  ros::Publisher pub_center;
 
-  //ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
 
 public:
   ImageConverter()
@@ -26,7 +34,9 @@ public:
     // Subscrive to input video feed and publish output video feed
     image_sub_ = it_.subscribe("/camera/rgb/image_raw", 1,
       &ImageConverter::imageCb, this);
-    image_pub_ = it_.advertise("/image_converter/output_video", 1);
+    image_pub_ = it_.advertise("/image_converter/output_video",1);
+
+    pub_center = nh_.advertise<std_msgs::Int32MultiArray>("center_of_object", 1);
 
     cv::namedWindow(OPENCV_WINDOW);
   }
@@ -98,7 +108,33 @@ public:
         }
     }
 
+
+
+    std_msgs::Int32MultiArray array;
     size_t count2 = center.size();
+
+
+    //ROS_INFO("%zd", count2);
+
+    if(count2==1){
+        int x = center[0].x;
+        int y = center[0].y;
+
+        // array that contains center of circle / object
+
+        array.data.clear();
+
+        array.data.push_back(x);
+        array.data.push_back(y);
+
+
+    }
+    else{
+        array.data.push_back(0);
+        array.data.push_back(0);
+    }
+
+    pub_center.publish(array);
     cv::Scalar red(255,0,0);
 
     for( int i = 0; i < count2; i++)
@@ -110,10 +146,12 @@ public:
     // Update GUI Window
     cv::imshow(OPENCV_WINDOW, ThreshImage);
     //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-    cv::waitKey(3);
+    cv::waitKey(3);    // Output modified video stream
 
-    // Output modified video stream
+
     image_pub_.publish(cv_ptr->toImageMsg());
+
+
 
 
   }
