@@ -82,6 +82,7 @@ public:
     cv::Scalar   min(40, 80, 50);
     cv::Scalar   max(80, 255, 255);
 
+
     //Transform the colors into HSV
     cv::cvtColor(cv_ptr->image,HSVImage,CV_BGR2HSV);
     //extract color
@@ -150,9 +151,6 @@ public:
 
 
     image_pub_.publish(cv_ptr->toImageMsg());
-
-
-
 
   }
 };

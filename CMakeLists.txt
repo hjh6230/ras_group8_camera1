@@ -138,6 +138,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/${PROJECT_NAME}_node.cpp)
+add_executable(depth_node src/ras_group8_camerad_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -151,6 +152,10 @@ add_executable(${PROJECT_NAME}_node src/${PROJECT_NAME}_node.cpp)
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries( ${PROJECT_NAME}_node
+   ${catkin_LIBRARIES}
+ )
+
+ target_link_libraries(depth_node
    ${catkin_LIBRARIES}
  )
 
