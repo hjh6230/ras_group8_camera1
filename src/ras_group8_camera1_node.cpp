@@ -69,7 +69,7 @@ public:
       return;
     }
 
-    ROS_INFO("rows = %i, cols= %i", cv_ptr->image.rows, cv_ptr->image.cols);
+    //ROS_INFO("rows = %i, cols= %i", cv_ptr->image.rows, cv_ptr->image.cols);
 
 
 

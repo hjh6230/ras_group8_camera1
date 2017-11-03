@@ -2,7 +2,7 @@
   <include file="/home/ras18/catkin_ws/src/ras_realsense/realsense_camera/launch/sr300_nodelet_rgbd.launch"/>
 
 
-  <!-- Launch RAS Group 8 Camera1 Node -->
+  <!-- Launch RAS Group 8 LidarTransform Node -->
   <node pkg="ras_group8_camera1" type="ras_group8_camera1_node" name="ras_group8_camera" output="screen">
    
   </node>

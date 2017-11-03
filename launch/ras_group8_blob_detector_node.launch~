@@ -1,0 +1,16 @@
+<launch>  
+  <include file="/home/ras18/catkin_ws/src/ras_realsense/realsense_camera/launch/sr300_nodelet_rgbd.launch"/>
+
+
+  <!-- Launch RAS Group 8 Camera1 Node 
+  <node pkg="ras_group8_camera1" type="ras_group8_blob_detector_node" name="ras_group8_camera" output="screen">
+  </node>
+-->
+
+  <node pkg="ras_group8_camera1" type="blob_detector_node" name="ras_group8_blob" output="screen">
+    
+  </node>
+
+
+
+</launch>

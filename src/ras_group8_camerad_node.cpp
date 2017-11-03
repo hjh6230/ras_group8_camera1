@@ -103,29 +103,29 @@ public:
     float y=((v-v0)*z)/beta;
     float x=(z*(u-u0)-s*y)/alpha;
     geometry_msgs::PointStamped msg;
-    msg.header.frame_id="/camera_depth_optical_frame";
+    msg.header.frame_id="/camera_link";
     msg.header.stamp=ros::Time::now();
     msg.point.x=x/1000;
     msg.point.y=y/1000;
     msg.point.z=z/1000;
     pub_target.publish(msg);
     visualization_msgs::Marker marker;
-    marker.header.frame_id = "/camera_depth_optical_frame";
+    marker.header.frame_id = "/camera_link";
     marker.header.stamp    = ros::Time::now();
     marker.ns = "obj";
     marker.id = 0;
     marker.type = 2;
     marker.action = 0;
-    marker.pose.position.x=x/1000;
+    marker.pose.position.x=z/1000;
     marker.pose.position.y=y/1000;
-    marker.pose.position.z=z/1000;
+    marker.pose.position.z=x/1000;
     marker.pose.orientation.x = 0;
     marker.pose.orientation.y = 0;
     marker.pose.orientation.z = 0;
     marker.pose.orientation.w = 1.0;
-    marker.scale.x = 0.1;
-    marker.scale.y = 0.1;
-    marker.scale.z = 0.1;
+    marker.scale.x = 0.05;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.05;
 
     marker.color.r = 0.0;
     marker.color.g = 1.0;
@@ -169,7 +169,6 @@ public:
     // Crop the full image to that image contained by the rectangle myROI
     // Note that this doesn't copy the data
     cv::Mat croppedDepthImage = DepthImage(myROI);
-    ROS_INFO("1");
 
 
 
@@ -189,9 +188,9 @@ public:
         //target=ros::Vector2(center[i].x,center[i].y);
 
     //remove noise yo
-    //cv::Mat str_el = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
-    //morphologyEx(croppedDepthImage, croppedDepthImage, cv::MORPH_OPEN, str_el);
-    //morphologyEx(croppedDepthImage, croppedDepthImage, cv::MORPH_CLOSE, str_el);
+    // cv::Mat str_el = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
+    // morphologyEx(croppedDepthImage, croppedDepthImage, cv::MORPH_OPEN, str_el);
+    // morphologyEx(croppedDepthImage, croppedDepthImage, cv::MORPH_CLOSE, str_el);
     
 
     //color image is in size 640 480
@@ -200,32 +199,28 @@ public:
     //cv::Point2i pt(center.x*cols/640+cols/2,center.y*rows/480+rows/2);
     if (center.x!=0, center.y!=0)
     {
-      ROS_INFO("2");
     cv::Point2i pt(center.x*cols/640,center.y*rows/480);
-    ROS_INFO("3");
-
     ROS_INFO("x = %i, y= %i", pt.x, pt.y);
-    ROS_INFO("rows = %i, cols= %i", rows, cols);
+    //ROS_INFO("rows = %i, cols= %i", rows, cols);
 
 
     //The following if statement is needed so that the program doesn't crash in some situations
     if ((pt.x<cols-50) && (pt.y<rows)){
 
         //std::cout << typeid(pt.x).name() << '\n';
-    ROS_INFO("4");
-    float depth_value=croppedDepthImage.at<int>(pt.x,pt.y);
+    float depth_value=croppedDepthImage.at<float>(pt.x,pt.y);
 
-    ROS_INFO("value %f",depth_value);
-    publish_location(depth_value, pt.x/cols*640, pt.y/rows*480);
     
-    int circle_radius = 80;
+    if(depth_value!=0)
+    {
+      ROS_INFO("value %f",depth_value);
+      publish_location(depth_value, pt.x/cols*640, pt.y/rows*480);
+      //publish_location(depth_value, center.x+320, center.y+240);
+    
+      int circle_radius = 80;
 
-    cv::Point2i pt2(0,0);
-    cv::Point2i pt3(cols, rows);
-
-    cv::circle(croppedDepthImage, pt2, 20, red, 3);
-    cv::circle(croppedDepthImage, pt3, 20, red, 3);
-    cv::circle(croppedDepthImage, pt, circle_radius, red, 3);
+      cv::circle(croppedDepthImage, pt, circle_radius, red, 3);
+    }
     }
   }
 
