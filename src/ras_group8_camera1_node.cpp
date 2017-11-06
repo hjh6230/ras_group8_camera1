@@ -18,6 +18,13 @@
 
 static const std::string OPENCV_WINDOW = "Image window";
 
+//try:
+namespace cv
+{
+    using std::vector;
+
+}
+
 class ImageConverter
 {
   ros::NodeHandle nh_;
@@ -58,6 +65,7 @@ public:
 
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
   {
+
     cv_bridge::CvImagePtr cv_ptr;
     try
     {
@@ -74,8 +82,8 @@ public:
 
 
     // Draw an example circle on the video stream
-    if (cv_ptr->image.rows > 60 && cv_ptr->image.cols > 60)
-      cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
+    //if (cv_ptr->image.rows > 60 && cv_ptr->image.cols > 60)
+    //  cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255,0,0));
 
     cv::Mat HSVImage;
     cv::Mat ThreshImage;
@@ -110,6 +118,8 @@ public:
 
     size_t count = contours.size();
 
+    //center.clear();
+    //radius.clear();
     for( int i=0; i<count; i++)
     {
         cv::Point2f c;
@@ -130,6 +140,7 @@ public:
 
 
     //ROS_INFO("%zd", count2);
+
 
     if(count2>0){
 
