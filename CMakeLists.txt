@@ -141,7 +141,7 @@ include_directories(
 add_executable(${PROJECT_NAME}_node src/${PROJECT_NAME}_node.cpp)
 add_executable(depth_node src/ras_group8_camerad_node.cpp)
 add_executable(blob_detector_node src/ras_group8_blob_detector_node.cpp)
-add_executable(color_detect_node src/ras_group8_camera1_color_node.cpp)
+add_executable(color_detect_node src/ras_group8_camera_color_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

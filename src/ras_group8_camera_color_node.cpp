@@ -12,9 +12,10 @@
 #include "std_msgs/MultiArrayDimension.h"
 #include "std_msgs/Int32MultiArray.h"
 #include "std_msgs/String.h"
+#include "string"
 
 //try:
-//#include <sensor_msgs/ChannelFloat32>
+//#include <sensor_msgs/Channelfloat>
 
 
 //static const std::string OPENCV_WINDOW = "Image window";
@@ -68,6 +69,8 @@ public:
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
   {
 
+    ROS_INFO("start cb");
+
     cv_bridge::CvImagePtr cv_ptr;
     try
     {
@@ -90,12 +93,11 @@ public:
     cv::Mat HSVImage;
     cv::Mat ThreshImage;
     cv::vector<cv::vector<cv::Point> > contours;
-    cv::vector<cv::Vec4i> heirarchy;
+    
     cv::vector<cv::Point2i> center;
     cv::vector<int> radius;
 
-    bool enableRadiusCulling = 1;
-    int minTargetRadius = 50;
+    
 
 
     cv::Scalar min;
@@ -108,23 +110,23 @@ public:
 
 
     //for blue:
-    min= new cv::Scalar(80, 50, 50);
+    min= cv::Scalar(80, 50, 50);
     minlist.push_back(min);
-    max= new cv::Scalar(110, 255, 255);
+    max= cv::Scalar(110, 255, 255);
     maxlist.push_back(max);
 
 
     // for green
 
-    min= new cv::Scalar(40, 80, 50);
+    min= cv::Scalar(40, 80, 50);
     minlist.push_back(min);
-    max= new cv::Scalar(80, 255, 255);
+    max= cv::Scalar(80, 255, 255);
     maxlist.push_back(max);
 
     //for yellow
-    min= new cv::Scalar(20, 100, 50);
+    min= cv::Scalar(20, 100, 50);
     minlist.push_back(min);
-    max= new cv::Scalar(40, 255, 255);
+    max= cv::Scalar(40, 255, 255);
     maxlist.push_back(max);
 
 
@@ -134,26 +136,30 @@ public:
     cv::cvtColor(cv_ptr->image,HSVImage,CV_BGR2HSV);
 
     float rads[3]={0,0,0};
+    ROS_INFO("Setting complete");
 
-    for (int i=1;i<3;i++)
+    for (int i=0;i<3;i++)
     {
-      int rad[i]=findobj(HSVImage,minlist[i],maxlist[i],ThreshImage);
+      rads[i]=findobj(HSVImage,minlist[i],maxlist[i],ThreshImage);
+      ROS_INFO("find in loop %d, rad %f",i,rads[i]);
     }
-    float32 max=0;
+    float maxrad=0;
     int order=0;
     for (int i=0;i<3;i++)
     {
-      if (rad[i]>max)
+      if (rads[i]>maxrad)
       {
         order=i;
-        max=rad[i];
+        maxrad=rads[i];
       }
     }
-    if (max==0) message="N/A";
-    else if (order==0) message="Blue";
-    else if (order==1) message="Green";
-    else if (order==2) message="Yellow";
+    if (maxrad==0) message.data="N/A";
+    else if (order==0) message.data="Blue";
+    else if (order==1) message.data="Green";
+    else if (order==2) message.data="Yellow";
     pub_.publish(message);
+    ROS_INFO("endCB");
+
 
 
 
@@ -230,23 +236,29 @@ public:
 
   }
 
-  float32 findobj(cv::Mat &HSVImage, cv::Scalar min, cv::Scalar max,cv::Mat &ThreshImage)
+  float findobj(cv::Mat &HSVImage, cv::Scalar min, cv::Scalar max,cv::Mat &ThreshImage)
   {
     cv::inRange(HSVImage,min,max,ThreshImage);
-    cv::vector<cv::vector<cv::Point> > contours
+    cv::vector<cv::vector<cv::Point> > contours;
     cv::vector<cv::Point2i> center;
     cv::vector<int> radius;
+    cv::vector<cv::Vec4i> heirarchy;
+    bool enableRadiusCulling = 1;
+    int minTargetRadius = 50;
 
     //remove noise
+    ROS_INFO("1");
     cv::Mat str_el = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
     morphologyEx(ThreshImage, ThreshImage, cv::MORPH_OPEN, str_el);
     morphologyEx(ThreshImage, ThreshImage, cv::MORPH_CLOSE, str_el);
 
     cv::findContours( ThreshImage.clone(), contours, heirarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+    ROS_INFO("2");
 
     size_t count = contours.size();
     //center.clear();
     //radius.clear();
+    ROS_INFO("3");
     for( int i=0; i<count; i++)
     {
         cv::Point2f c;
@@ -259,7 +271,8 @@ public:
             radius.push_back(r);
         }
     }
-    if (count==0) return -1;
+    if (radius.size()==0) return -1;
+
     else return radius[0];
 
 
@@ -274,6 +287,14 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "image_color detect");
   ImageColor ic;
+
+  
+  ros::Rate loop_rate(5);
+  for (;;) {
+      ros::spinOnce();
+      loop_rate.sleep();
+
+  }
   ros::spin();
   return 0;
 }
